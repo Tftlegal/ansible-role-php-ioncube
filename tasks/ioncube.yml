@@ -1,6 +1,6 @@
 ---
 - name: determine installed PHP version
-  shell: "php -v | head -1 | grep -o 'PHP 5.[0-9]' | sed -r 's/PHP //g'"
+  shell: "php -v | head -1 | grep -o 'PHP 7.[0-9]' | sed -r 's/PHP //g'"
   register: php_version
   failed_when: "php_version.stdout == ''"
 
