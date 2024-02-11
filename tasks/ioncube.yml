@@ -42,7 +42,7 @@
     #line: 'zend_extension={{ php_extension_dir }}/ioncube_loader_lin_7.4.so'
     line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
 
- - name: apache2 reload
+- name: apache2 reload
   systemd:
     name: apache2
     state: restarted
