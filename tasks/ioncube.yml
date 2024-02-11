@@ -61,7 +61,7 @@
 
 - name: php7.4-fpm restart
   systemd:
-    name: php7.4-fpm-fpm
+    name: php7.4-fpm
     state: restarted
 
 #- name: link configuration
