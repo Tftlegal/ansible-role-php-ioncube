@@ -15,21 +15,12 @@
     php_version="{{ php_version.stdout }}"
     php_extension_dir="{{ php_extension_dir.stdout }}"
     ioncube_tarfile="ioncube_loaders.tar.gz"
-
-# TODO check for conflicting modules
-#- name: check for conflicting modules (like ...)
-
+    
 - name: download ion-cube-loader 64bit tar archive
   get_url: >
-    url=http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz
+    url=https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz
     dest=/tmp/{{ ioncube_tarfile }}
   when: ansible_machine == 'x86_64'
-
-- name: download ion-cube-loader 32bit tar archive
-  get_url: >
-    url=http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86.tar.gz
-    dest=/tmp/{{ ioncube_tarfile }}
-  when: ansible_machine == 'i686'
 
 - name: unpack tar archive
   unarchive:
@@ -40,16 +31,49 @@
 - name: install appropriate .so module
   command: cp "/tmp/ioncube/ioncube_loader_lin_{{ php_version }}.so" "{{ php_extension_dir }}/ioncube_loader_lin_{{ php_version }}.so"
 
-- name: add configuration
+#- name: add configuration
+#  template: >
+#    src=ioncube.ini.j2
+#    dest=/etc/php5/mods-available/ioncube.ini
+
+- name: add configuration Apache mod_php
   template: >
     src=ioncube.ini.j2
-    dest=/etc/php5/mods-available/ioncube.ini
+    dest=/etc/php/7.4/apache2/php.ini
+    dest=/etc/php/{{ php_version }}/apache2/php.ini
 
-- name: link configuration
-  file:
-    src: /etc/php5/mods-available/ioncube.ini
-    dest: /etc/php5/conf.d/05-ioncube.ini
-    state: link
+ - name: apache2 reload
+  systemd:
+    name: apache2
+    state: restarted
+    
+- name: add configuration PHP-FPM
+  template: >
+    src=ioncube.ini.j2
+    #dest=/etc/php/7.4/fpm/php.ini
+    dest=/etc/php/{{ php_version }}/fpm/php.ini
+
+- name: php7.4-fpm restart
+  systemd:
+    name: php{{ php_version }}-fpm
+    state: restarted
+
+ - name: add configuration PHP CGI
+  template: >
+    src=ioncube.ini.j2
+    #dest=/etc/php/7.4/cgi/php.ini
+    dest=/etc/php/{{ php_version }}/cgi/php.ini 
+
+- name: php7.4-fpm restart
+  systemd:
+    name: php{{ php_version }}-fpm
+    state: restarted
+
+#- name: link configuration
+#  file:
+#    src: /etc/php5/mods-available/ioncube.ini
+#    dest: /etc/php5/conf.d/05-ioncube.ini
+#    state: link
 
 - name: reload apache2
   service: name=apache2 state=reloaded
