@@ -1,7 +1,7 @@
 ---
 - name: check if ioncube loader is already loaded
   stat:
-    path: /etc/php5/conf.d/05-ioncube.ini
+    path: /etc/php/7.4/apache2/conf.d/05-ioncube.ini
   register: stat_ioncube
 
 - include: ioncube.yml
