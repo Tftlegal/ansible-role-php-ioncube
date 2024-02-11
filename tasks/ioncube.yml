@@ -39,7 +39,7 @@
 - name: add configuration Apache mod_php
   template: >
     src=ioncube.ini.j2
-    dest=/etc/php/7.4/apache2/php.ini
+    #dest=/etc/php/7.4/apache2/php.ini
     dest=/etc/php/{{ php_version }}/apache2/php.ini
 
  - name: apache2 reload
@@ -75,5 +75,14 @@
 #    dest: /etc/php5/conf.d/05-ioncube.ini
 #    state: link
 
-- name: reload apache2
-  service: name=apache2 state=reloaded
+- name: link configuration
+  file:
+    src: /etc/php/7.4/apache2/mods-available/ioncube.ini
+    #dest: /etc/php/7.4/apache2/conf.d/05-ioncube.ini
+    dest: /etc/php/{{ php_version }}/apache2/05-ioncube.ini
+    state: link
+    
+- name: apache2 reload
+  systemd:
+    name: apache2
+    state: restarted
