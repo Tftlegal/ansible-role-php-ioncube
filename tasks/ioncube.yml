@@ -54,7 +54,7 @@
     line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
 
 - name: add configuration PHP CGI
-lineinfile:
+  lineinfile:
     path: "/etc/php/7.4/cgi/php.ini"
     #line: 'zend_extension={{ php_extension_dir }}/ioncube_loader_lin_7.4.so'
     line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
