@@ -36,11 +36,22 @@
     src=ioncube.ini.j2
     dest=/etc/apache2/ioncube.ini
 
-- name: add configuration Apache mod_php
+- name: Check Register File Stat apache2/php.ini
+  stat:
+    path: "/etc/php/{{ php_version }}/apache2/php.ini"
+  register: stat_result
+
+- name: add configuration Apache mod_php{{ php_version }}
   lineinfile:
-    path: "/etc/php/7.4/apache2/php.ini"
-    #line: 'zend_extension={{ php_extension_dir }}/ioncube_loader_lin_7.4.so'
-    line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
+    path: "/etc/php/{{ php_version }}/apache2/php.ini"
+    line: "zend_extension={{ php_extension_dir }}/ioncube_loader_lin_{{ php_version }}.so"
+    #line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
+  when: stat_result.stat.exists
+
+#- name: Cat file if exists
+#  shell: cat "/etc/php/{{ php_version }}/apache2/php.ini"
+#  when: stat_result.stat.exists
+#  register: stat_apache2_php_ini 
 
 - name: apache2 reload
   systemd:
@@ -49,19 +60,30 @@
     
 - name: add configuration PHP-FPM
   lineinfile:
-    path: "/etc/php/7.4/fpm/php.ini"
-    #line: 'zend_extension={{ php_extension_dir }}/ioncube_loader_lin_7.4.so'
-    line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
+    path: "/etc/php/{{ php_version }}/fpm/php.ini"
+    line: "zend_extension={{ php_extension_dir }}/ioncube_loader_lin_{{ php_version }}.so"
+    #line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
 
 - name: add configuration PHP CGI
   lineinfile:
-    path: "/etc/php/7.4/cgi/php.ini"
-    #line: 'zend_extension={{ php_extension_dir }}/ioncube_loader_lin_7.4.so'
-    line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
+    path: "/etc/php/{{ php_version }}/cgi/php.ini"
+    line: "zend_extension={{ php_extension_dir }}/ioncube_loader_lin_{{ php_version }}.so"
+    #line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
 
-- name: php7.4-fpm restart
+- name: add configuration PHP CLI (command line PHP)
+  lineinfile:
+    path: "/etc/php/{{ php_version }}/cli/php.ini"
+    line: "zend_extension={{ php_extension_dir }}/ioncube_loader_lin_{{ php_version }}.so"
+    #line: 'zend_extension=/usr/lib/php/20190902/ioncube_loader_lin_7.4.so'
+
+#- name: php7.4-fpm restart
+#  systemd:
+#    name: php7.4-fpm
+#    state: restarted
+
+- name: php{{ php_version }}-fpm restart
   systemd:
-    name: php7.4-fpm
+    name: php{{ php_version }}-fpm
     state: restarted
 
 #- name: link configuration
@@ -70,7 +92,7 @@
 #    #dest: /etc/php/7.4/apache2/conf.d/05-ioncube.ini
 #    dest: /etc/php/{{ php_version }}/apache2/conf.d/05-ioncube.ini
 #    state: link
-    
+
 - name: apache2 reload
   systemd:
     name: apache2
